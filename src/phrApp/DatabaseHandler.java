@@ -2,7 +2,11 @@ package phrApp;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class DatabaseHandler {
 	
@@ -10,12 +14,17 @@ public class DatabaseHandler {
 	private static String user;
 	private static String password;
 	private static Connection connection = null;
+	private static PHR resultPHR;
+	private static List<PHR> resultPHRList;
+	private static List<Integer> resultIDList;
+	private static int successFlag;
+	private static int rowsAffected;
 	
 	/**
-	 * Initializes private fields user, password and url and checks the success of database connection 
+	 * Initializes private fields user, password and URL and checks the success of database connection 
 	 * using these parameters.
 	 * 
-	 * @param ip					The ip address of the database server.
+	 * @param ip					The IP address of the database server.
 	 * @param port					The port of the database server.
 	 * @param user					The user account on the database server.
 	 * @param password				The password for the user account on the database server.
@@ -24,12 +33,104 @@ public class DatabaseHandler {
 	public static boolean authentication(String ip, int port, String user, String password) {
 		DatabaseHandler.user = user;
 		DatabaseHandler.password = password;
-		url = "jdbc:mysql://" + ip + ":" + port + "/movieDB";
+		url = "jdbc:mysql://" + ip + ":" + port + "/access_control_DB";
 		if (startConnection() == 0) {
 			closeConnection();
 			return true;
 		}
 		return false;
+	}
+	
+	/**
+	 * Adds a Patient Health Record (PHR) to the database with all columns.
+	 * 
+	 * @param detail				Encrypted payload of the PHR to be added.
+	 * @param policy				Policy of the PHR to be added.
+	 * @param ownerID				Owner ID of the PHR to be added.
+	 * @param authorID				Author ID of the PHR to be added.
+	 * @param doctorID				Doctor ID of the PHR to be added.
+	 * @param insuranceID			Insurance ID of the PHR to be added.
+	 * @return						0/-1 for successful/unsuccessful execution.
+	 * @exception SQLException 		An exception that provides information on a database access error or other errors.
+	 */
+	public static int addPatientHealthRecord(byte[] detail, String policy, int ownerID, int authorID, int doctorID, int insuranceID) {
+		startConnection();
+		PreparedStatement preparedStatement = null;
+		successFlag = -1;
+		rowsAffected = 0;
+		try {
+			preparedStatement = connection.prepareStatement("INSERT INTO access_control_DB.patient_health_record " +
+					"(detail, policy, owner_patient_user_id, author_user_id, doctor_user_id, insurance_co_user_id) VALUES (?, ?, ?, ?, ?, ?);");
+			preparedStatement.setBytes(1, detail);
+			preparedStatement.setString(2, policy);
+			preparedStatement.setInt(3, ownerID);
+			preparedStatement.setInt(4, authorID);
+			preparedStatement.setInt(5, doctorID);
+			preparedStatement.setInt(6, insuranceID);
+			rowsAffected = preparedStatement.executeUpdate();
+			if (rowsAffected > 0)
+				successFlag = 0;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		closeConnection(preparedStatement);
+		return successFlag;
+	}
+	
+	/**
+	 * Searches for PHRs within the database, containing patientID as the search criteria.
+	 * 
+	 * @param patientID				The previously selected patient's ID, which will be used for matching PHRs.
+	 * @return						A List containing PHR objects for each PHR matching the search criteria.
+	 * @exception SQLException 		An exception that provides information on a database access error or other errors.
+	 */
+	public static List<PHR> searchForPHRByPatientID(int patientID) {
+		startConnection();
+		PreparedStatement preparedStatement = null;
+		ResultSet resultSet = null;
+		resultPHRList = new ArrayList<PHR>();
+		try {
+			preparedStatement = connection.prepareStatement("SELECT * FROM access_control_DB.patient_health_record WHERE owner_patient_user_id = ?;");
+			preparedStatement.setInt(1, patientID);
+			resultSet = preparedStatement.executeQuery();
+			while (resultSet.next()) {
+				resultPHR = new PHR(resultSet.getInt("id"), resultSet.getBytes("detail"), resultSet.getString("policy"), 
+						resultSet.getInt("owner_patient_user_id"), resultSet.getInt("author_user_id"), resultSet.getInt("doctor_user_id"), 
+						resultSet.getInt("insurance_user_id"));
+				resultPHRList.add(resultPHR);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		closeConnection(preparedStatement, resultSet);
+		return resultPHRList;
+	}
+	
+	/**
+	 * Searches for patient IDs within the database, containing patientName as the search criteria.
+	 * 
+	 * @param patientName			A patient's name, which will be used for matching patient IDs.
+	 * @return						An array containing patient IDs, matching the search criteria.
+	 * @exception SQLException 		An exception that provides information on a database access error or other errors.
+	 */
+	public static List<Integer> searchForPatientIDByPatientName(String patientName) {
+		startConnection();
+		PreparedStatement preparedStatement = null;
+		ResultSet resultSet = null;
+		resultIDList = new ArrayList<Integer>();
+		try {
+			preparedStatement = connection.prepareStatement("SELECT * FROM access_control_DB.user WHERE name = ? AND "
+					+ "EXISTS (SELECT 1 FROM access_control_DB.patient WHERE access_control_DB.user.id = access_control_DB.patient.user_id);");
+			preparedStatement.setString(1, patientName);
+			resultSet = preparedStatement.executeQuery();
+			while (resultSet.next()) {
+				resultIDList.add(resultSet.getInt("id"));
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		closeConnection(preparedStatement, resultSet);
+		return resultIDList;
 	}
 	
 	/**
@@ -56,6 +157,41 @@ public class DatabaseHandler {
 			return -1;
 		}
 		
+	}
+	
+	/**
+	 * Closes a connection to the database.
+	 * 
+	 * @param preparedStatement		preparedStatement to be checked before the closure of the connection.
+	 * @param resultSet				resultSet to be checked before the closure of the connection.
+	 */
+	private static void closeConnection(PreparedStatement preparedStatement, ResultSet resultSet) {
+		try {
+            if (resultSet != null)
+            	resultSet.close();
+            if (preparedStatement != null)
+            	preparedStatement.close();
+            if (connection != null)
+            	connection.close();
+        } catch (SQLException e) {
+        	e.printStackTrace();
+        }
+	}
+	
+	/**
+	 * Closes a connection to the database.
+	 * 
+	 * @param preparedStatement		preparedStatement to be checked before the closure of the connection.
+	 */
+	private static void closeConnection(PreparedStatement preparedStatement) {
+		try {
+            if (preparedStatement != null)
+            	preparedStatement.close();
+            if (connection != null)
+            	connection.close();
+        } catch (SQLException e) {
+        	e.printStackTrace();
+        }
 	}
 	
 	/**
