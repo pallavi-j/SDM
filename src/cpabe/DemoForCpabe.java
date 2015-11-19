@@ -11,7 +11,7 @@ public class DemoForCpabe {
 
 	static String inputfile = "input";
 	static String encfile = "input.cpabe";
-	static String decfile = "input.new";
+	static String decfile = "input.dec";
 
 	static String[] attr = { "baf1", "fim1", "foo" };
 	static String policy = "foo bar fim 2of3 baf 1of2";
@@ -419,20 +419,20 @@ public class DemoForCpabe {
 		policy = student_policy;
 
 		Cpabe test = new Cpabe();
-		println("//start to setup");
-		test.setup(pubfile, mskfile);
-		println("//end to setup");
+		//println("//start to setup");
+		//test.setup(pubfile, mskfile);
+		//println("//end to setup");
 
-		println("//start to keygen");
-		test.keygen(pubfile, prvfile, mskfile, attr_str);
-		println("//end to keygen");
+		//println("//start to keygen");
+		//test.keygen(pubfile, prvfile, mskfile, attr_str);
+		//println("//end to keygen");
 
-		println("//start to enc");
-		test.enc(pubfile, policy, inputfile, encfile);
-		println("//end to enc");
+		//println("//start to enc");
+		//test.enc(pubfile, policy, "Patient is fat");
+		//println("//end to enc");
 
 		println("//start to dec");
-		test.dec(pubfile, prvfile, encfile, decfile);
+		test.dec(pubfile, prvfile, 2);
 		println("//end to dec");
 	}
 

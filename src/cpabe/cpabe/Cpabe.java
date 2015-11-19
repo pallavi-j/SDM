@@ -12,6 +12,7 @@ import cpabe.bswabe.BswabePub;
 import cpabe.bswabe.SerializeUtils;
 import cpabe.cpabe.policy.LangPolicy;
 import it.unisa.dia.gas.jpbc.Element;
+import phrApp.DatabaseHandler;
 
 public class Cpabe {
 
@@ -80,19 +81,15 @@ public class Cpabe {
 	}
 
 	/**
-	 * Encrypts a file using the specified public key and policy. Outputs the 
-	 * encrypted file in your workspace named encfile.
-	 * @param pubfile The public key
-	 * @param policy The policy to be used. This defines which attributes
-	 * are required to decrypt the file. The policy is defined as a string.
-	 * An example of the policy: (uid:student2 AND (sn:student2 OR cn:student2)) =
-	 * "uid:student2 sn:student2 cn:student2 1of2 2of2"
-	 * @param inputfile The file which has to be encrypted
-	 * @param encfile The output file, stored in your workspace.
+	 * Takes a public key and data about a PHR and encrypts the data using the specified policy.
+	 * The data is stored in the database.
+	 * @param pubfile The location of the public key
+	 * @param policy The policy which is needed to decrypt the file, e.g. 'pID:04 dID:12 1of2'
+	 * @param input The PHR details specified as a string.
 	 * @throws Exception
 	 */
-	public void enc(String pubfile, String policy, String inputfile,
-			String encfile) throws Exception {
+	//TODO: Store the data in the table public_health_record instead of 'Temp'.
+	public void enc(String pubfile, String policy, String input) throws Exception {
 		BswabePub pub;
 		BswabeCph cph;
 		BswabeCphKey keyCph;
@@ -119,23 +116,24 @@ public class Cpabe {
 		cphBuf = SerializeUtils.bswabeCphSerialize(cph);
 
 		/* read file to encrypted */
-		plt = Common.suckFile(inputfile);
+		String inputString = input;
+		plt = inputString.getBytes();
 		aesBuf = AESCoder.encrypt(m.toBytes(), plt);
-		// PrintArr("element: ", m.toBytes());
-		Common.writeCpabeFile(encfile, cphBuf, aesBuf);
+		// PrintArr("element: ", m.toBytes());		
+		DatabaseHandler.authentication("127.0.0.1", 3306, "richard", "12345");
+		DatabaseHandler.addTemp(aesBuf, cphBuf);
 	}
 	
 	/**
-	 * Tries to decrypt the encfile using the privfile as key. The result
-	 * is stored in the decfile in your workspace.
-	 * @param pubfile The public key file
-	 * @param prvfile The private key file
-	 * @param encfile The encrypted message file
-	 * @param decfile The name to store the decrypted file
+	 * Takes the public key and the private key of a specific user and tries to decrypt a public health record.
+	 * Return a string containing either the public health record data or an error message.
+	 * @param pubfile The location of the public key file
+	 * @param prvfile The location of the private key file
+	 * @param PHRID The public health record ID which as to be decrpyted
 	 * @throws Exception
 	 */
-	public void dec(String pubfile, String prvfile, String encfile,
-			String decfile) throws Exception {
+	//TODO: currently uses a temporary table named 'Temp', this should be changed to 'patient_health_record'
+	public String dec(String pubfile, String prvfile, int PHRID) throws Exception {
 		byte[] aesBuf, cphBuf;
 		byte[] plt;
 		byte[] prv_byte;
@@ -150,9 +148,10 @@ public class Cpabe {
 		pub = SerializeUtils.unserializeBswabePub(pub_byte);
 
 		/* read ciphertext */
-		tmp = Common.readCpabeFile(encfile);
-		aesBuf = tmp[0];
-		cphBuf = tmp[1];
+		DatabaseHandler.authentication("127.0.0.1", 3306, "richard", "12345");
+		aesBuf = DatabaseHandler.searchForaesBufByPHRID(PHRID);
+		cphBuf = DatabaseHandler.searchForcphBufByPHRID(PHRID);
+		
 		cph = SerializeUtils.bswabeCphUnserialize(pub, cphBuf);
 
 		/* get BswabePrv form prvfile */
@@ -163,9 +162,11 @@ public class Cpabe {
 		System.err.println("e = " + beb.e.toString());
 		if (beb.b) {
 			plt = AESCoder.decrypt(beb.e.toBytes(), aesBuf);
-			Common.spitFile(decfile, plt);
+			//Common.spitFile(decfile, plt); //skip, instead show the output of decreption on screen!
+			System.out.println(new String(plt));
+			return new String(plt);
 		} else {
-			System.exit(0);
+			return new String("You do not have access to this file");
 		}
 	}
 

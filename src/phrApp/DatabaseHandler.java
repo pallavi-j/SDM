@@ -1,5 +1,10 @@
 package phrApp;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -53,20 +58,42 @@ public class DatabaseHandler {
 	 * @return						0/-1 for successful/unsuccessful execution.
 	 * @exception SQLException 		An exception that provides information on a database access error or other errors.
 	 */
-	public static int addPatientHealthRecord(byte[] detail, String policy, int ownerID, int authorID, int doctorID, int insuranceID) {
+	public static int addPatientHealthRecord(byte[] aesBuf, byte[] cphBuf, String policy, int ownerID, int authorID, int doctorID, int insuranceID) {
 		startConnection();
 		PreparedStatement preparedStatement = null;
 		successFlag = -1;
 		rowsAffected = 0;
 		try {
 			preparedStatement = connection.prepareStatement("INSERT INTO access_control_DB.patient_health_record " +
-					"(detail, policy, owner_patient_user_id, author_user_id, doctor_user_id, insurance_co_user_id) VALUES (?, ?, ?, ?, ?, ?);");
-			preparedStatement.setBytes(1, detail);
-			preparedStatement.setString(2, policy);
-			preparedStatement.setInt(3, ownerID);
-			preparedStatement.setInt(4, authorID);
-			preparedStatement.setInt(5, doctorID);
-			preparedStatement.setInt(6, insuranceID);
+					"(aesBuf, cphBuf, policy, owner_patient_user_id, author_user_id, doctor_user_id, insurance_co_user_id) VALUES (?, ?, ?, ?, ?, ?, ?);");
+			preparedStatement.setBytes(1, aesBuf);
+			preparedStatement.setBytes(2, cphBuf);
+			preparedStatement.setString(3, policy);
+			preparedStatement.setInt(4, ownerID);
+			preparedStatement.setInt(5, authorID);
+			preparedStatement.setInt(6, doctorID);
+			preparedStatement.setInt(7, insuranceID);
+			rowsAffected = preparedStatement.executeUpdate();
+			if (rowsAffected > 0)
+				successFlag = 0;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		closeConnection(preparedStatement);
+		return successFlag;
+	}
+	
+	//TODO: temp method, shoudl be deleted when Cpabe.enc and Cpabe.dec are completely implemented. 
+	public static int addTemp(byte[] aesBuf, byte[] cphBuf) {
+		startConnection();
+		PreparedStatement preparedStatement = null;
+		successFlag = -1;
+		rowsAffected = 0;
+		try {
+			preparedStatement = connection.prepareStatement("INSERT INTO access_control_DB.Temp " +
+					"(aesBuf, cphBuf) VALUES (?, ?);");
+			preparedStatement.setBytes(1, aesBuf);
+			preparedStatement.setBytes(2, cphBuf);
 			rowsAffected = preparedStatement.executeUpdate();
 			if (rowsAffected > 0)
 				successFlag = 0;
@@ -204,6 +231,47 @@ public class DatabaseHandler {
         } catch (SQLException e) {
         	e.printStackTrace();
         }
+	}
+	
+	public static byte[] searchForaesBufByPHRID(int PHRID) {
+		startConnection();
+		PreparedStatement preparedStatement = null;
+		ResultSet resultSet = null;
+		resultPHRList = new ArrayList<PHR>();
+		byte[] output = null;
+		try {
+			preparedStatement = connection.prepareStatement("SELECT * FROM access_control_DB.Temp WHERE idTemp = ?;");
+			preparedStatement.setInt(1, PHRID);
+			resultSet = preparedStatement.executeQuery();
+			resultSet.next();
+			Blob blob = resultSet.getBlob("aesBuf");
+			output = blob.getBytes(1, (int) blob.length());
+			blob.free();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		closeConnection(preparedStatement, resultSet);
+		return output;
+	}
+	
+	public static byte[] searchForcphBufByPHRID(int PHRID) {
+		startConnection();
+		PreparedStatement preparedStatement = null;
+		ResultSet resultSet = null;
+		resultPHRList = new ArrayList<PHR>();
+		byte[] output = null;
+		try {
+			preparedStatement = connection.prepareStatement("SELECT cphBuf FROM access_control_DB.Temp WHERE idTemp = ?;");
+			preparedStatement.setInt(1, PHRID);
+			resultSet = preparedStatement.executeQuery();
+			resultSet.next();
+			Blob blob = resultSet.getBlob("cphBuf");
+			output = blob.getBytes(1, (int) blob.length());
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		closeConnection(preparedStatement, resultSet);
+		return output;
 	}
 
 }
