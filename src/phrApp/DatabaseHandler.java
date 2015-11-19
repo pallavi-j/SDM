@@ -53,20 +53,21 @@ public class DatabaseHandler {
 	 * @return						0/-1 for successful/unsuccessful execution.
 	 * @exception SQLException 		An exception that provides information on a database access error or other errors.
 	 */
-	public static int addPatientHealthRecord(byte[] detail, String policy, int ownerID, int authorID, int doctorID, int insuranceID) {
+	public static int addPatientHealthRecord(byte[] detail, byte[] aes, String policy, int ownerID, int authorID, int doctorID, int insuranceID) {
 		startConnection();
 		PreparedStatement preparedStatement = null;
 		successFlag = -1;
 		rowsAffected = 0;
 		try {
 			preparedStatement = connection.prepareStatement("INSERT INTO access_control_DB.patient_health_record " +
-					"(detail, policy, owner_patient_user_id, author_user_id, doctor_user_id, insurance_co_user_id) VALUES (?, ?, ?, ?, ?, ?);");
+					"(detail, aes, policy, owner_patient_user_id, author_user_id, doctor_user_id, insurance_co_user_id) VALUES (?, ?, ?, ?, ?, ?, ?);");
 			preparedStatement.setBytes(1, detail);
-			preparedStatement.setString(2, policy);
-			preparedStatement.setInt(3, ownerID);
-			preparedStatement.setInt(4, authorID);
-			preparedStatement.setInt(5, doctorID);
-			preparedStatement.setInt(6, insuranceID);
+			preparedStatement.setBytes(2, aes);
+			preparedStatement.setString(3, policy);
+			preparedStatement.setInt(4, ownerID);
+			preparedStatement.setInt(5, authorID);
+			preparedStatement.setInt(6, doctorID);
+			preparedStatement.setInt(7, insuranceID);
 			rowsAffected = preparedStatement.executeUpdate();
 			if (rowsAffected > 0)
 				successFlag = 0;
