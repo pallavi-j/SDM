@@ -427,9 +427,9 @@ public class DemoForCpabe {
 		//test.keygen(pubfile, prvfile, mskfile, attr_str);
 		//println("//end to keygen");
 
-		//println("//start to enc");
-		//test.enc(pubfile, policy, "Patient is fat");
-		//println("//end to enc");
+		println("//start to enc");
+		test.enc(pubfile, policy, "Patient is infected");
+		println("//end to enc");
 
 		println("//start to dec");
 		test.dec(pubfile, prvfile, 2);
