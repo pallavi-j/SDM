@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.text.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="330.0" prefWidth="821.0" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <Label layoutX="25.0" layoutY="21.0" prefHeight="37.0" prefWidth="107.0" text="Please Log In">
+         <font>
+            <Font name="Corbel Bold" size="18.0" />
+         </font>
+      </Label>
+      <TextField layoutX="371.0" layoutY="77.0" prefHeight="30.0" prefWidth="245.0" />
+      <TextField layoutX="371.0" layoutY="150.0" prefHeight="30.0" prefWidth="245.0" />
+      <Label layoutX="174.0" layoutY="77.0" prefHeight="30.0" prefWidth="146.0" text="Enter Your User ID" textAlignment="CENTER">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </Label>
+      <Label layoutX="113.0" layoutY="155.0" text="Browse Private Key File's Path">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </Label>
+      <Button layoutX="320.0" layoutY="226.0" mnemonicParsing="false" prefHeight="58.0" prefWidth="182.0" text="Log In">
+         <font>
+            <Font size="24.0" />
+         </font>
+      </Button>
+   </children>
+</AnchorPane>
