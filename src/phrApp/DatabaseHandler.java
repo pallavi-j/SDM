@@ -121,9 +121,9 @@ public class DatabaseHandler {
 			preparedStatement.setInt(1, patientID);
 			resultSet = preparedStatement.executeQuery();
 			while (resultSet.next()) {
-				resultPHR = new PHR(resultSet.getInt("id"), resultSet.getBytes("detail"), resultSet.getString("policy"), 
-						resultSet.getInt("owner_patient_user_id"), resultSet.getInt("author_user_id"), resultSet.getInt("doctor_user_id"), 
-						resultSet.getInt("insurance_user_id"));
+				resultPHR = new PHR(resultSet.getInt("id"), resultSet.getBytes("aesBuf"), resultSet.getBytes("cphBuf"), resultSet.getString("policy"), 0, 0, 0, 0); //TODO fill in foreign keys
+						//resultSet.getInt("owner_patient_user_id"), resultSet.getInt("author_user_id"), resultSet.getInt("doctor_user_id"), 
+						//resultSet.getInt("insurance_user_id"));
 				resultPHRList.add(resultPHR);
 			}
 		} catch (SQLException e) {
