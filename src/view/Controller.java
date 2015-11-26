@@ -1,6 +1,8 @@
 package view;
 
 import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -44,6 +46,22 @@ public class Controller implements Initializable {
 	private Button btnReadDecrypt;
 	@FXML
 	private TextArea txtReadDetails;
+	
+	//Manage Entity
+	@FXML 
+	private TextField txtMngEntNameAdd;
+	@FXML 
+	private TextField txtMngEntRoleAdd;
+	@FXML 
+	private Button btnMngEntAdd;
+	@FXML 
+	private TextField txtMngEntNameRemove;
+	@FXML 
+	private TextField txtMngEntRoleRemove;
+	@FXML 
+	private TextField txtMngEntIdRemove;
+	@FXML 
+	private Button btnMngEntRemove;
 
 	public Controller() {
 		DatabaseHandler.authentication("127.0.0.1", 3306, "root", "root");
@@ -111,7 +129,38 @@ public class Controller implements Initializable {
 				System.out.println("Name: " + txtReadsrchName.getText());
 			}
 		});
-
+		
+		//Manage Entity button handlers
+		btnMngEntAdd.setOnAction(new EventHandler() {
+		    @Override
+			public void handle(Event event) {
+		    	//Add entity
+			    String addName = txtMngEntNameAdd.getText();
+				String resultRoles = txtMngEntRoleAdd.getText();
+				String[] rolesArray = resultRoles.split("-");
+				
+				SimpleDateFormat ft = new SimpleDateFormat ("dd-MM-yyyy");
+				//DatabaseHandler dbHandler = new DatabaseHandler();
+				//dbHandler.authentication("127.0.0.1", 3306, "root", "root");
+				DatabaseHandler.addEntity(addName,rolesArray,ft.format(new Date( )));
+			}
+		});
+		btnMngEntRemove.setOnAction(new EventHandler() {
+		    @Override
+			public void handle(Event event) {
+		    	//Remove entity
+		    	String removeName = txtMngEntNameRemove.getText();
+		    	String[] removeRoles = {"empty"};
+		    	if(!txtMngEntRoleRemove.getText().equals(""))
+		    		removeRoles = (txtMngEntRoleRemove.getText()).split("-");
+				String removeID = txtMngEntIdRemove.getText();
+				
+				//DatabaseHandler dbHandler = new DatabaseHandler();
+				//dbHandler.authentication("127.0.0.1", 3306, "root", "root");
+				DatabaseHandler.removeEntity(removeName,removeRoles,Integer.parseInt(removeID));
+				
+			}
+		});
 	}
 
 }

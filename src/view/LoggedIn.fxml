@@ -8,7 +8,7 @@
 <?import javafx.scene.paint.*?>
 <?import javafx.scene.text.*?>
 
-<VBox prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.Controller">
+<VBox prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.Controller">
   <children>
     <AnchorPane maxHeight="-1.0" maxWidth="-1.0" prefHeight="-1.0" prefWidth="-1.0" VBox.vgrow="ALWAYS">
       <children>
@@ -85,9 +85,9 @@
                                 <items>
                                   <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
                                        <children>
-                                          <TextField layoutX="187.0" layoutY="117.0" />
-                                          <Button layoutX="144.0" layoutY="309.0" mnemonicParsing="false" prefHeight="36.0" prefWidth="110.0" text="Add Entity" />
-                                          <TextField layoutX="187.0" layoutY="234.0" />
+                                          <TextField fx:id="txtMngEntNameAdd" layoutX="187.0" layoutY="117.0" />
+                                          <Button fx:id="btnMngEntAdd" layoutX="144.0" layoutY="309.0" mnemonicParsing="false" prefHeight="36.0" prefWidth="110.0" text="Add Entity" />
+                                          <TextField fx:id="txtMngEntRoleAdd" layoutX="187.0" layoutY="234.0" />
                                           <Label layoutX="104.0" layoutY="119.0" text="Name">
                                              <font>
                                                 <Font size="15.0" />
@@ -101,10 +101,10 @@
                                           <Label layoutX="64.0" layoutY="117.0" text="Name" />
                                           <Label layoutX="66.0" layoutY="172.0" text="Role" />
                                           <Label layoutX="74.0" layoutY="228.0" text="ID" />
-                                          <TextField layoutX="133.0" layoutY="113.0" />
-                                          <TextField layoutX="133.0" layoutY="168.0" />
-                                          <TextField layoutX="133.0" layoutY="224.0" />
-                                          <Button layoutX="141.0" layoutY="296.0" mnemonicParsing="false" prefHeight="36.0" prefWidth="114.0" text="Remove Entity" />
+                                          <TextField fx:id="txtMngEntNameRemove" layoutX="133.0" layoutY="113.0" />
+                                          <TextField fx:id="txtMngEntRoleRemove" layoutX="133.0" layoutY="168.0" />
+                                          <TextField fx:id="txtMngEntIdRemove" layoutX="133.0" layoutY="224.0" />
+                                          <Button fx:id="btnMngEntRemove" layoutX="141.0" layoutY="296.0" mnemonicParsing="false" prefHeight="36.0" prefWidth="114.0" text="Remove Entity" />
                                        </children>
                                     </AnchorPane>
                                 </items>

@@ -11,7 +11,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+
+import javax.swing.JOptionPane;
+
+import com.mysql.jdbc.Statement;
 
 public class DatabaseHandler {
 	
@@ -22,8 +27,10 @@ public class DatabaseHandler {
 	private static PHR resultPHR;
 	private static List<PHR> resultPHRList;
 	private static List<Integer> resultIDList;
+	//private static List<String> resultTESTList;
 	private static int successFlag;
 	private static int rowsAffected;
+	//private static String responseAddEnt;
 	
 	/**
 	 * Initializes private fields user, password and URL and checks the success of database connection 
@@ -274,4 +281,114 @@ public class DatabaseHandler {
 		return output;
 	}
 
+	/*
+	//This is just for testing purposes.....
+	public List<String> getUserList(){
+		startConnection();
+		PreparedStatement preparedStatement = null;
+		ResultSet resultSet = null;
+		resultTESTList = new ArrayList<String>();
+		
+		try {
+			preparedStatement = connection.prepareStatement("SELECT name FROM access_control_DB.user;");
+			//preparedStatement.setString(1, patientName);
+			resultSet = preparedStatement.executeQuery();
+			while (resultSet.next()) {
+				resultTESTList.add(resultSet.getString("name"));
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		closeConnection(preparedStatement, resultSet);
+		return resultTESTList;
+		
+	}*/
+
+	public static void  addEntity(String nameEntity,String[] rolesEntity,String dateAdded){
+		//responseAddEnt = "";
+		startConnection();
+		PreparedStatement preparedStatement = null;
+		ResultSet generatedID = null;
+		int affectedRows;
+		int affectedRowId;
+		
+		try {
+			String insertUserSQL = "INSERT INTO access_control_db.user "
+					  			 + "(name) VALUES"
+					  			 + "(?);";
+			
+			preparedStatement = connection.prepareStatement(insertUserSQL, Statement.RETURN_GENERATED_KEYS);
+			preparedStatement.setString(1, nameEntity);
+
+			affectedRows = preparedStatement.executeUpdate();
+			if (affectedRows == 1) {
+				generatedID = preparedStatement.getGeneratedKeys();
+				if (generatedID.next()){
+					affectedRowId = generatedID.getInt(1);
+					int count = 0;
+					while(count<rolesEntity.length){
+						String insertRoleSQL = "INSERT INTO access_control_db." + rolesEntity[count++]
+					  			 			 + " (user_id,detail) VALUES"
+					  			 			 + " (?,?);";
+						preparedStatement = connection.prepareStatement(insertRoleSQL);
+						preparedStatement.setInt(1,affectedRowId);
+						preparedStatement.setString(2, dateAdded);
+						//JOptionPane.showMessageDialog(null, insertRoleSQL);
+						affectedRows = preparedStatement.executeUpdate();
+						if (affectedRows != 1) {
+							throw new SQLException("Creating user failed, no rows affected.");
+						}
+					}
+	            }
+	            else {
+	                throw new SQLException("Creating user failed, no ID obtained.");
+	            }
+	        } else{
+	        	throw new SQLException("Creating user failed, no rows affected.");
+	        }
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		closeConnection(preparedStatement, generatedID);
+		//return responseAddEnt;
+	}
+	
+	public static void  removeEntity(String removeName,String[] removeEntity,Integer removeID){
+		//responseAddEnt = "";
+		startConnection();
+		PreparedStatement preparedStatement = null;
+		ResultSet generatedID = null;
+		if(removeEntity[0].equals("empty")){
+			String[] removeEntity2 = {"patient","doctor","employer","insurance_co","user"};
+			removeEntity = removeEntity2;
+		}
+		
+		//int affectedRows;
+		ResultSet test = null;
+		/*int affectedRowId;*/
+		
+		try {
+			int count=0;
+			while(count<removeEntity.length){
+				String column = (removeEntity[count]=="user") ? "id=" : "user_id=";
+				String removeRoleSQL = "DELETE FROM access_control_db." + removeEntity[count++]
+									 + " WHERE " + column +  + removeID + ";";
+				preparedStatement = connection.prepareStatement(removeRoleSQL);
+				preparedStatement.executeUpdate();
+				//if (affectedRows != 1) {
+				//	JOptionPane.showMessageDialog(null, "Deleting Entity failed.\n One of the entity you're trying to delete may not have existed");
+				//	throw new SQLException("Deleting entity failed");
+				//}
+			}
+			JOptionPane.showMessageDialog(null, "Succesfully deleted entity related to user "+removeName+"("+removeID+")");
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		closeConnection(preparedStatement, test);
+		//return responseAddEnt;
+	}
+	
 }
