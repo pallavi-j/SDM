@@ -1,10 +1,16 @@
 package view;
 
+import java.io.IOException;
 import java.net.URL;
+import java.security.NoSuchAlgorithmException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.ResourceBundle;
 
 import cpabe.cpabe.Cpabe;
+import cpabe.cpabe.EncFile;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
@@ -25,7 +31,13 @@ public class Controller implements Initializable {
 
 	// Write data to specific PHR
 	@FXML
-	private TextField txtWrtUserId;
+	private TextField txtWrtPatient;
+	@FXML
+	private TextField txtWrtAuthor;
+	@FXML
+	private TextField txtWrtDoctor;
+	@FXML
+	private TextField txtWrtInsurance;
 	@FXML
 	private TextField txtWrtPolicy;
 	@FXML
@@ -44,10 +56,34 @@ public class Controller implements Initializable {
 	private Button btnReadDecrypt;
 	@FXML
 	private TextArea txtReadDetails;
+	
+	//Manage Entity
+	@FXML 
+	private TextField txtMngEntNameAdd;
+	@FXML 
+	private TextField txtMngEntRoleAdd;
+	@FXML 
+	private Button btnMngEntAdd;
+	@FXML 
+	private TextField txtMngEntNameRemove;
+	@FXML 
+	private TextField txtMngEntRoleRemove;
+	@FXML 
+	private TextField txtMngEntIdRemove;
+	@FXML 
+	private Button btnMngEntRemove;
 
 	public Controller() {
 		DatabaseHandler.authentication("127.0.0.1", 3306, "root", "root");
 		cpabe = new Cpabe();
+		try {
+			cpabe.setup("pub", "msk");
+			cpabe.keygen("pub", "prv", "msk", "pid:1 did:2");
+		} catch (ClassNotFoundException | IOException e) {
+			e.printStackTrace();
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -55,54 +91,59 @@ public class Controller implements Initializable {
 		btnWrtEncrypt.setOnAction(new EventHandler() {
 			@Override
 			public void handle(Event event) {
+				System.out.println("Write");
 				// Write data to specific PHR
-				int userId;
 				try {
-					userId = Integer.valueOf(txtWrtUserId.getText());
-					
+					int userId = Integer.valueOf(txtWrtPatient.getText());
+					int authorId = Integer.valueOf(txtWrtAuthor.getText());
+					int doctorId = Integer.valueOf(txtWrtDoctor.getText());
+					int insuranceId = Integer.valueOf(txtWrtInsurance.getText());
 					String policy = txtWrtPolicy.getText();
 					String input = txtWrtDetails.getText();
-					
-					cpabe.enc(pubfile, policy, input);
+					//breaks because no pubfile
+					EncFile enc = cpabe.enc2("pub", policy, input);
+					DatabaseHandler.addPatientHealthRecord(enc.getAesBuf(), enc.getCphBuf(), policy, userId, authorId, doctorId, insuranceId);
+					//write enc to the database
 					
 				} catch (NumberFormatException e) {
-					txtWrtDetails.setText("Incorrect user ID");
+					txtWrtDetails.setText("Incorrect input parameters!");
 				} catch (Exception e) {
-					txtWrtDetails.setText("Error occured during the encryption");
+					txtWrtDetails.setText("Incorrect input parameters");
+					System.out.println("Exception: " +  e.getMessage());
+					
 				}
 			}
 		});
 
+		//Search for PHRs
 		btnReadSearch.setOnAction(new EventHandler() {
 			@Override
 			public void handle(Event event) {
+				System.out.println("Search");
 				String patientName = txtReadsrchName.getText();
 				// get all users with the name
 				List<Integer> patientIds = DatabaseHandler.searchForPatientIDByPatientName(patientName);
 				// then get their PHR's
-				ObservableList<PHR> phrs = FXCollections.observableArrayList();
+				ObservableList<PHR> phrView = FXCollections.observableArrayList();
 				for (Integer i : patientIds) {
-					System.out.println("PatientId: " + i);
-					phrs.addAll(DatabaseHandler.searchForPHRByPatientID(i));
+					phrView.addAll(DatabaseHandler.searchForPHRByPatientID(i));
 				}
-				lstReadEncPHRs.setItems(phrs);
-
-				System.out.println("Search ended");
-				// System.out.println("Name: " + txtReadsrchName.getText());
+				lstReadEncPHRs.setItems(phrView);
 			}
 		});
-
+		
+		// Decrypt specific PHR
 		btnReadDecrypt.setOnAction(new EventHandler() {
 			@Override
-			public void handle(Event event) {
-				// Decrypt specific PHR
+			public void handle(Event event) {	
 				System.out.println("Decrypt");
 				PHR selected = lstReadEncPHRs.getSelectionModel().getSelectedItem();
 				if (selected != null) {
 					System.out.println("Decrypt PHR");
 					try {
-						txtReadDetails.setText(cpabe.dec(pubfile, prvfile, selected.getAesBuf(), selected.getCphBuf()));
+						txtReadDetails.setText(cpabe.dec("pub", "prv", selected.getAesBuf(), selected.getCphBuf()));
 					} catch (Exception e) {
+						System.out.println("Exception " + e.getMessage());
 						txtReadDetails.setText("Unable to decrypt the PHR with your private key");
 					}
 				} else {
@@ -111,7 +152,38 @@ public class Controller implements Initializable {
 				System.out.println("Name: " + txtReadsrchName.getText());
 			}
 		});
-
+		
+		//Manage Entity button handlers
+		btnMngEntAdd.setOnAction(new EventHandler() {
+		    @Override
+			public void handle(Event event) {
+		    	//Add entity
+			    String addName = txtMngEntNameAdd.getText();
+				String resultRoles = txtMngEntRoleAdd.getText();
+				String[] rolesArray = resultRoles.split("-");
+				
+				SimpleDateFormat ft = new SimpleDateFormat ("dd-MM-yyyy");
+				//DatabaseHandler dbHandler = new DatabaseHandler();
+				//dbHandler.authentication("127.0.0.1", 3306, "root", "root");
+				DatabaseHandler.addEntity(addName,rolesArray,ft.format(new Date( )));
+			}
+		});
+		btnMngEntRemove.setOnAction(new EventHandler() {
+		    @Override
+			public void handle(Event event) {
+		    	//Remove entity
+		    	String removeName = txtMngEntNameRemove.getText();
+		    	String[] removeRoles = {"empty"};
+		    	if(!txtMngEntRoleRemove.getText().equals(""))
+		    		removeRoles = (txtMngEntRoleRemove.getText()).split("-");
+				String removeID = txtMngEntIdRemove.getText();
+				
+				//DatabaseHandler dbHandler = new DatabaseHandler();
+				//dbHandler.authentication("127.0.0.1", 3306, "root", "root");
+				DatabaseHandler.removeEntity(removeName,removeRoles,Integer.parseInt(removeID));
+				
+			}
+		});
 	}
 
 }

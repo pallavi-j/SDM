@@ -124,6 +124,40 @@ public class Cpabe {
 		DatabaseHandler.addTemp(aesBuf, cphBuf);
 	}
 	
+	public EncFile enc2(String pubfile, String policy, String input) throws Exception {
+		BswabePub pub;
+		BswabeCph cph;
+		BswabeCphKey keyCph;
+		byte[] plt;
+		byte[] cphBuf;
+		byte[] aesBuf;
+		byte[] pub_byte;
+		Element m;
+
+		/* get BswabePub from pubfile */
+		pub_byte = Common.suckFile(pubfile);
+		pub = SerializeUtils.unserializeBswabePub(pub_byte);
+
+		keyCph = Bswabe.enc(pub, policy);
+		cph = keyCph.cph;
+		m = keyCph.key;
+		System.err.println("m = " + m.toString());
+
+		if (cph == null) {
+			System.out.println("Error happed in enc");
+			System.exit(0);
+		}
+
+		cphBuf = SerializeUtils.bswabeCphSerialize(cph);
+
+		/* read file to encrypted */
+		String inputString = input;
+		plt = inputString.getBytes();
+		aesBuf = AESCoder.encrypt(m.toBytes(), plt);
+		// PrintArr("element: ", m.toBytes());
+		return new EncFile(aesBuf, cphBuf);
+	}
+	
 	/**
 	 * Takes the public key and the private key of a specific user and tries to decrypt a public health record.
 	 * Return a string containing either the public health record data or an error message.

@@ -35,10 +35,10 @@
                               <Insets top="20.0" />
                            </padding>
                            <children>
-                              <Label layoutX="276.0" layoutY="123.0" text="User ID" />
-                              <TextField fx:id="txtWrtUserId" layoutX="438.0" layoutY="119.0" />
-                              <Label layoutX="280.0" layoutY="182.0" text="Policy" />
-                              <TextField fx:id="txtWrtPolicy" layoutX="438.0" layoutY="178.0" />
+                              <Label layoutX="289.0" layoutY="35.0" text="Patient ID" />
+                              <TextField fx:id="txtWrtPatient" layoutX="438.0" layoutY="30.0" />
+                              <Label layoutX="299.0" layoutY="182.0" text="Policy" />
+                              <TextField fx:id="txtWrtInsurance" layoutX="438.0" layoutY="141.0" />
                               <Label layoutX="383.0" layoutY="244.0" text="Record">
                                  <font>
                                     <Font size="15.0" />
@@ -50,6 +50,12 @@
                                     <Font size="16.0" />
                                  </font>
                               </Button>
+                              <Label layoutX="298.0" layoutY="70.0" text="Author" />
+                              <TextField fx:id="txtWrtAuthor" layoutX="439.0" layoutY="67.0" />
+                              <Label layoutX="297.0" layoutY="107.0" text="Doctor" />
+                              <TextField fx:id="txtWrtDoctor" layoutX="439.0" layoutY="103.0" />
+                              <Label layoutX="286.0" layoutY="145.0" text="Insurance" />
+                              <TextField fx:id="txtWrtPolicy" layoutX="437.0" layoutY="178.0" />
                            </children>
                         </AnchorPane>
                      </content>
@@ -85,9 +91,9 @@
                                 <items>
                                   <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
                                        <children>
-                                          <TextField layoutX="187.0" layoutY="117.0" />
-                                          <Button layoutX="144.0" layoutY="309.0" mnemonicParsing="false" prefHeight="36.0" prefWidth="110.0" text="Add Entity" />
-                                          <TextField layoutX="187.0" layoutY="234.0" />
+                                          <TextField fx:id="txtMngEntNameAdd" layoutX="187.0" layoutY="117.0" />
+                                          <Button fx:id="btnMngEntAdd" layoutX="144.0" layoutY="309.0" mnemonicParsing="false" prefHeight="36.0" prefWidth="110.0" text="Add Entity" />
+                                          <TextField fx:id="txtMngEntRoleAdd" layoutX="187.0" layoutY="234.0" />
                                           <Label layoutX="104.0" layoutY="119.0" text="Name">
                                              <font>
                                                 <Font size="15.0" />
@@ -101,10 +107,10 @@
                                           <Label layoutX="64.0" layoutY="117.0" text="Name" />
                                           <Label layoutX="66.0" layoutY="172.0" text="Role" />
                                           <Label layoutX="74.0" layoutY="228.0" text="ID" />
-                                          <TextField layoutX="133.0" layoutY="113.0" />
-                                          <TextField layoutX="133.0" layoutY="168.0" />
-                                          <TextField layoutX="133.0" layoutY="224.0" />
-                                          <Button layoutX="141.0" layoutY="296.0" mnemonicParsing="false" prefHeight="36.0" prefWidth="114.0" text="Remove Entity" />
+                                          <TextField fx:id="txtMngEntNameRemove" layoutX="133.0" layoutY="113.0" />
+                                          <TextField fx:id="txtMngEntRoleRemove" layoutX="133.0" layoutY="168.0" />
+                                          <TextField fx:id="txtMngEntIdRemove" layoutX="133.0" layoutY="224.0" />
+                                          <Button fx:id="btnMngEntRemove" layoutX="141.0" layoutY="296.0" mnemonicParsing="false" prefHeight="36.0" prefWidth="114.0" text="Remove Entity" />
                                        </children>
                                     </AnchorPane>
                                 </items>

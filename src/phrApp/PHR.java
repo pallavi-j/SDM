@@ -83,5 +83,10 @@ public class PHR {
 	public void setInsuranceID(int insuranceID) {
 		this.insuranceID = insuranceID;
 	}
+	
+	@Override
+	public String toString() {
+		return policy;
+	}
 
 }
