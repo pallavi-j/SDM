@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.text.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="300.0" prefWidth="650.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.ControllerDatabase">
+   <children>
+      <TextField fx:id="txtServerUsername" layoutX="217.0" layoutY="77.0" prefHeight="30.0" prefWidth="338.0" text="root">
+         <tooltip>
+            <Tooltip text="Username to the MySQL server, default is &quot;root&quot;." />
+         </tooltip></TextField>
+      <Label layoutX="37.0" layoutY="77.0" prefHeight="30.0" prefWidth="146.0" text="Database Username" textAlignment="CENTER">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </Label>
+      <Label layoutX="44.0" layoutY="156.0" text="Database Password">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </Label>
+      <Button fx:id="btnDatabaseCancel" layoutX="119.0" layoutY="213.0" mnemonicParsing="false" prefHeight="37.0" prefWidth="150.0" text="Cancel">
+         <font>
+            <Font size="24.0" />
+         </font>
+      </Button>
+      <Button fx:id="btnDatabaseOK" layoutX="405.0" layoutY="213.0" mnemonicParsing="false" prefHeight="37.0" prefWidth="150.0" text="OK">
+         <font>
+            <Font size="24.0" />
+         </font>
+      </Button>
+      <PasswordField fx:id="txtServerPassword" layoutX="217.0" layoutY="143.0" prefHeight="27.0" prefWidth="338.0">
+         <tooltip>
+            <Tooltip text="Password to the MySQL server" />
+         </tooltip>
+      </PasswordField>
+      <Label layoutX="14.0" layoutY="14.0" prefHeight="30.0" prefWidth="105.0" text="Server" textAlignment="CENTER">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </Label>
+      <TextField fx:id="txtServerPort" layoutX="490.0" layoutY="14.0" prefHeight="30.0" prefWidth="117.0" text="3306">
+         <tooltip>
+            <Tooltip text="MySQL Server's port, default is 3306." />
+         </tooltip>
+      </TextField>
+      <TextField fx:id="txtServerIP" layoutX="146.0" layoutY="14.0" prefHeight="30.0" prefWidth="286.0" text="127.0.0.1">
+         <tooltip>
+            <Tooltip text="MySQL Server's IP address. For localhost set it to &quot;127.0.0.1&quot;" />
+         </tooltip>
+      </TextField>
+      <Label layoutX="458.0" layoutY="14.0" prefHeight="30.0" prefWidth="22.0" text=":" textAlignment="CENTER">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </Label>
+   </children>
+</AnchorPane>

@@ -13,6 +13,7 @@ import cpabe.cpabe.Cpabe;
 import cpabe.cpabe.EncFile;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -22,12 +23,14 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import phrApp.DatabaseHandler;
+import phrApp.LoggedInUser;
 import phrApp.PHR;
 
 public class Controller implements Initializable {
 
 	private Cpabe cpabe;
 	private String prvfile, pubfile;
+	private LoggedInUser loggedInUser;
 
 	// Write data to specific PHR
 	@FXML
@@ -85,12 +88,16 @@ public class Controller implements Initializable {
 			e.printStackTrace();
 		}
 	}
+	
+	void initData(LoggedInUser loggedInUser) {
+	    this.loggedInUser = loggedInUser;
+	}
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
-		btnWrtEncrypt.setOnAction(new EventHandler() {
+		btnWrtEncrypt.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
-			public void handle(Event event) {
+			public void handle(ActionEvent event) {
 				System.out.println("Write");
 				// Write data to specific PHR
 				try {
@@ -116,9 +123,9 @@ public class Controller implements Initializable {
 		});
 
 		//Search for PHRs
-		btnReadSearch.setOnAction(new EventHandler() {
+		btnReadSearch.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
-			public void handle(Event event) {
+			public void handle(ActionEvent event) {
 				System.out.println("Search");
 				String patientName = txtReadsrchName.getText();
 				// get all users with the name
@@ -133,9 +140,9 @@ public class Controller implements Initializable {
 		});
 		
 		// Decrypt specific PHR
-		btnReadDecrypt.setOnAction(new EventHandler() {
+		btnReadDecrypt.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
-			public void handle(Event event) {	
+			public void handle(ActionEvent event) {	
 				System.out.println("Decrypt");
 				PHR selected = lstReadEncPHRs.getSelectionModel().getSelectedItem();
 				if (selected != null) {
@@ -154,9 +161,9 @@ public class Controller implements Initializable {
 		});
 		
 		//Manage Entity button handlers
-		btnMngEntAdd.setOnAction(new EventHandler() {
+		btnMngEntAdd.setOnAction(new EventHandler<ActionEvent>() {
 		    @Override
-			public void handle(Event event) {
+			public void handle(ActionEvent event) {
 		    	//Add entity
 			    String addName = txtMngEntNameAdd.getText();
 				String resultRoles = txtMngEntRoleAdd.getText();
@@ -165,12 +172,12 @@ public class Controller implements Initializable {
 				SimpleDateFormat ft = new SimpleDateFormat ("dd-MM-yyyy");
 				//DatabaseHandler dbHandler = new DatabaseHandler();
 				//dbHandler.authentication("127.0.0.1", 3306, "root", "root");
-				DatabaseHandler.addEntity(addName,rolesArray,ft.format(new Date( )));
+				//DatabaseHandler.addEntity(addName,rolesArray,ft.format(new Date( )));
 			}
 		});
-		btnMngEntRemove.setOnAction(new EventHandler() {
+		btnMngEntRemove.setOnAction(new EventHandler<ActionEvent>() {
 		    @Override
-			public void handle(Event event) {
+			public void handle(ActionEvent event) {
 		    	//Remove entity
 		    	String removeName = txtMngEntNameRemove.getText();
 		    	String[] removeRoles = {"empty"};
