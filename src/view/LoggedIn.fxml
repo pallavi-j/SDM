@@ -66,15 +66,15 @@
                           <items>
                             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="517.0" prefWidth="800.0">
                                  <children>
-                                    <TextField layoutX="423.0" layoutY="104.0" />
+                                    <TextField fx:id="txtPolicy" layoutX="423.0" layoutY="104.0" />
                                     <Label layoutX="222.0" layoutY="108.0" text="Enter the person's ID" />
-                                    <TextField layoutX="423.0" layoutY="154.0" />
+                                    <TextField fx:id="txtRecord" layoutX="423.0" layoutY="154.0" />
                                     <Label layoutX="222.0" layoutY="158.0" text="Enter Record's ID" />
                                     <Label layoutX="255.0" layoutY="248.0" text="The person's name is :" />
                                     <Label layoutX="232.0" layoutY="313.0" text="The record's contents are: " />
-                                    <Label layoutX="455.0" layoutY="248.0" text="Blah di Blah" />
-                                    <Label layoutX="449.0" layoutY="313.0" text="Super Duper fever" />
-                                    <Button layoutX="342.0" layoutY="391.0" mnemonicParsing="false" text="Manage Read Access" />
+                                    <Label fx:id="lblMng1" layoutX="455.0" layoutY="248.0" />
+                                    <Label fx:id="lblMng2" layoutX="449.0" layoutY="313.0" />
+                                    <Button fx:id="btnMngAccess" layoutX="342.0" layoutY="391.0" mnemonicParsing="false" text="Manage Read Access" />
                                  </children>
                               </AnchorPane>
                           </items>
