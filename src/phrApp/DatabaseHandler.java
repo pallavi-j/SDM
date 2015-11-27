@@ -13,6 +13,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -36,7 +37,7 @@ public class DatabaseHandler {
 	private static int rowsAffected;
 	
 	//C:/Users/Arthur/git/SDM
-	private static String privateFile = "F:/University of Twente/SDM/";
+	private static String privateFile = "./University of Twente/SDM/";
 	private static String publicFile = "./publicKey/";
 	private static String masterFile = "./masterKey/master_key";
 	
@@ -399,11 +400,11 @@ public class DatabaseHandler {
 		closeConnection(preparedStatement, generatedID);
 	}
 	
-	public static void  removeEntity(String removeName,String[] removeEntity,Integer removeID){
+	public static void  removeEntity(String removeName,String[] removeEntity,Integer removeID) throws Exception{
 		startConnection();
 		PreparedStatement preparedStatement = null;
 		ResultSet generatedID = null;
-		if(removeEntity[0].equals("empty")){
+		if(removeEntity[0].equals("empty") || (Arrays.asList(removeEntity).contains("user"))){
 			String[] removeEntity2 = {"patient","doctor","employer","insurance_co","user"};
 			removeEntity = removeEntity2;
 		}
@@ -421,12 +422,33 @@ public class DatabaseHandler {
 				preparedStatement = connection.prepareStatement(removeRoleSQL);
 				preparedStatement.executeUpdate();
 			}
+			String dirPath = publicFile + removeName + removeID;
+			File dir = new File(dirPath);
+			if(dir.exists()){
+				removeDirectoryKey(dir);
+			}  else
+				throw new Exception("Failed to remove entity.");
+			
 			JOptionPane.showMessageDialog(null, "Succesfully deleted entity related to user "+removeName+"("+removeID+")");
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 		
 		closeConnection(preparedStatement, test);
+	}
+	
+	public static void removeDirectoryKey(File dir) {
+	    if (dir.isDirectory()) {
+	        File[] files = dir.listFiles();
+	        if (files != null && files.length > 0) {
+	            for (File aFile : files) {
+	            	removeDirectoryKey(aFile);
+	            }
+	        }
+	        dir.delete();
+	    } else {
+	        dir.delete();
+	    }
 	}
 	
 }

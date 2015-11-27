@@ -161,36 +161,48 @@ public class Controller implements Initializable {
 		});
 		
 		//Manage Entity button handlers
-		btnMngEntAdd.setOnAction(new EventHandler<ActionEvent>() {
-		    @Override
-			public void handle(ActionEvent event) {
-		    	//Add entity
-			    String addName = txtMngEntNameAdd.getText();
-				String resultRoles = txtMngEntRoleAdd.getText();
-				String[] rolesArray = resultRoles.split("-");
-				
-				SimpleDateFormat ft = new SimpleDateFormat ("dd-MM-yyyy");
-				//DatabaseHandler dbHandler = new DatabaseHandler();
-				//dbHandler.authentication("127.0.0.1", 3306, "root", "root");
-				//DatabaseHandler.addEntity(addName,rolesArray,ft.format(new Date( )));
-			}
-		});
-		btnMngEntRemove.setOnAction(new EventHandler<ActionEvent>() {
-		    @Override
-			public void handle(ActionEvent event) {
-		    	//Remove entity
-		    	String removeName = txtMngEntNameRemove.getText();
-		    	String[] removeRoles = {"empty"};
-		    	if(!txtMngEntRoleRemove.getText().equals(""))
-		    		removeRoles = (txtMngEntRoleRemove.getText()).split("-");
-				String removeID = txtMngEntIdRemove.getText();
-				
-				//DatabaseHandler dbHandler = new DatabaseHandler();
-				//dbHandler.authentication("127.0.0.1", 3306, "root", "root");
-				DatabaseHandler.removeEntity(removeName,removeRoles,Integer.parseInt(removeID));
-				
-			}
-		});
+				btnMngEntAdd.setOnAction(new EventHandler() {
+				    @Override
+					public void handle(Event event) {
+				    	//Add entity
+					    String addName = txtMngEntNameAdd.getText();
+						String resultRoles = txtMngEntRoleAdd.getText();
+						String[] rolesArray = resultRoles.split("-");
+						
+						SimpleDateFormat ft = new SimpleDateFormat ("dd-MM-yyyy");
+						try {
+							DatabaseHandler.addEntity(addName,rolesArray,ft.format(new Date( )),cpabe);
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						try {
+							DatabaseHandler.addEntity(addName,rolesArray,ft.format(new Date( )),cpabe);
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+				});
+				btnMngEntRemove.setOnAction(new EventHandler() {
+				    @Override
+					public void handle(Event event) {
+				    	//Remove entity
+				    	String removeName = txtMngEntNameRemove.getText();
+				    	String[] removeRoles = {"empty"};
+				    	if(!txtMngEntRoleRemove.getText().equals(""))
+				    		removeRoles = (txtMngEntRoleRemove.getText()).split("-");
+						String removeID = txtMngEntIdRemove.getText();
+						
+						try {
+							DatabaseHandler.removeEntity(removeName,removeRoles,Integer.parseInt(removeID));
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						
+					}
+				});
 	}
 
 }
