@@ -450,5 +450,38 @@ public class DatabaseHandler {
 	        dir.delete();
 	    }
 	}
-	
+
+	public static boolean updatePolicy(String policy,int recId) {
+		startConnection();
+		PreparedStatement preparedStatement = null;
+		try {
+			String updatePolicy = "UPDATE access_control_DB.patient_health_record SET policy = ? WHERE id = ?";
+			preparedStatement.setInt(1,recId);
+			preparedStatement.setString(2,policy);
+			preparedStatement = connection.prepareStatement(updatePolicy);
+
+			preparedStatement.executeQuery();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		}
+		closeConnection(preparedStatement);
+		return  true;
+	}
+
+	public static boolean updateAesCph(byte[] aes,byte[] cph,int recId) {
+		startConnection();
+		PreparedStatement preparedStatement = null;
+		try {
+			String updateAesCph = "UPDATE access_control_DB.patient_health_record SET aesBuf = ? and cphBuf = ? where id = ?";
+			preparedStatement.setBytes(1,aes);
+			preparedStatement.setBytes(2,cph);
+			preparedStatement.setInt(3,recId);
+			preparedStatement = connection.prepareStatement(updateAesCph);
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		}
+		return true;
+	}
 }

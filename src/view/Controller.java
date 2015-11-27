@@ -18,10 +18,7 @@ import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Button;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import phrApp.DatabaseHandler;
 import phrApp.LoggedInUser;
 import phrApp.PHR;
@@ -47,6 +44,19 @@ public class Controller implements Initializable {
 	private TextArea txtWrtDetails;
 	@FXML
 	private Button btnWrtEncrypt;
+
+	// Manage Read Access
+
+	@FXML
+	private Button btnMngAccess;
+	@FXML
+	private TextField txtRecord;
+	@FXML
+	private TextField txtPolicy;
+	@FXML
+	private Label lblMng1;
+	@FXML
+	private Label lblMng2;
 
 	// Request data
 	@FXML
@@ -203,6 +213,31 @@ public class Controller implements Initializable {
 						
 					}
 				});
+
+		btnMngAccess.setOnAction(new EventHandler() {
+			@Override
+			public void handle(Event event) {
+				String policy = txtPolicy.getText();
+				int recId = Integer.parseInt(txtRecord.getText());
+				byte[] aes = DatabaseHandler.searchForaesBufByPHRID(recId);
+				byte[] cphb = DatabaseHandler.searchForcphBufByPHRID(recId);
+				Alert alert = new Alert(Alert.AlertType.INFORMATION);
+				try {
+					lblMng2.setText(cpabe.dec("pub","prv",aes,cphb));
+					cpabe.enc2("pub",policy,lblMng2.getText());
+					DatabaseHandler.updatePolicy(policy,recId);
+					alert.setTitle("Confirmed");
+					alert.setContentText("Access policy has been updated.");
+
+				} catch (IOException e) {
+					e.printStackTrace();
+					alert.setContentText("Access policy could not be updated");
+				} catch (Exception e) {
+					e.printStackTrace();
+					alert.setContentText("Access policy could not be updated");
+				}
+			}
+		});
 	}
 
 }
