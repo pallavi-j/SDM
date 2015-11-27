@@ -2,16 +2,17 @@ package phrApp;
 
 public class PHR {
 	private int id;
-	private byte[] detail;
+	private byte[] aesBuf, cphBuf;
 	private String policy;
 	private int ownerID;
 	private int authorID;
 	private int doctorID;
 	private int insuranceID;
 	
-	public PHR(int id, byte[] detail, String policy, int ownerID, int authorID, int doctorID, int insuranceID) {
+	public PHR(int id, byte[] aesBuf, byte[] cphBuf, String policy, int ownerID, int authorID, int doctorID, int insuranceID) {
 		this.setId(id);
-		this.setDetail(detail);
+		this.setAesBuf(aesBuf);
+		this.setCphBuf(cphBuf);
 		this.setPolicy(policy);
 		this.setOwnerID(ownerID);
 		this.setAuthorID(authorID);
@@ -27,12 +28,20 @@ public class PHR {
 		this.id = id;
 	}
 
-	public byte[] getDetail() {
-		return detail;
+	public byte[] getAesBuf() {
+		return aesBuf;
 	}
 
-	public void setDetail(byte[] detail) {
-		this.detail = detail;
+	public void setAesBuf(byte[] aesBuf) {
+		this.aesBuf = aesBuf;
+	}
+	
+	public byte[] getCphBuf() {
+		return cphBuf;
+	}
+	
+	public void setCphBuf(byte[] cphBuf) {
+		this.cphBuf = cphBuf;
 	}
 
 	public String getPolicy() {
@@ -73,6 +82,11 @@ public class PHR {
 
 	public void setInsuranceID(int insuranceID) {
 		this.insuranceID = insuranceID;
+	}
+	
+	@Override
+	public String toString() {
+		return policy;
 	}
 
 }

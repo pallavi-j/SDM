@@ -1,9 +1,11 @@
 package phrApp;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -11,7 +13,14 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+
+import javax.swing.JOptionPane;
+
+import com.mysql.jdbc.Statement;
+
+import cpabe.cpabe.Cpabe;
 
 public class DatabaseHandler {
 	
@@ -22,9 +31,19 @@ public class DatabaseHandler {
 	private static PHR resultPHR;
 	private static List<PHR> resultPHRList;
 	private static List<Integer> resultIDList;
+	//private static List<String> resultTESTList;
 	private static int successFlag;
 	private static int rowsAffected;
 	
+	//C:/Users/Arthur/git/SDM
+	private static String privateFile = "F:/University of Twente/SDM/";
+	private static String publicFile = "./publicKey/";
+	private static String masterFile = "./masterKey/master_key";
+	
+	public DatabaseHandler() {
+		
+	}
+
 	/**
 	 * Initializes private fields user, password and URL and checks the success of database connection 
 	 * using these parameters.
@@ -90,7 +109,7 @@ public class DatabaseHandler {
 		successFlag = -1;
 		rowsAffected = 0;
 		try {
-			preparedStatement = connection.prepareStatement("INSERT INTO access_control_DB.Temp " +
+			preparedStatement = connection.prepareStatement("INSERT INTO access_control_DB.patient_health_record " +
 					"(aesBuf, cphBuf) VALUES (?, ?);");
 			preparedStatement.setBytes(1, aesBuf);
 			preparedStatement.setBytes(2, cphBuf);
@@ -121,9 +140,9 @@ public class DatabaseHandler {
 			preparedStatement.setInt(1, patientID);
 			resultSet = preparedStatement.executeQuery();
 			while (resultSet.next()) {
-				resultPHR = new PHR(resultSet.getInt("id"), resultSet.getBytes("detail"), resultSet.getString("policy"), 
-						resultSet.getInt("owner_patient_user_id"), resultSet.getInt("author_user_id"), resultSet.getInt("doctor_user_id"), 
-						resultSet.getInt("insurance_user_id"));
+				resultPHR = new PHR(resultSet.getInt("id"), resultSet.getBytes("aesBuf"), resultSet.getBytes("cphBuf"), resultSet.getString("policy"), 0, 0, 0, 0); //TODO fill in foreign keys
+						//resultSet.getInt("owner_patient_user_id"), resultSet.getInt("author_user_id"), resultSet.getInt("doctor_user_id"), 
+						//resultSet.getInt("insurance_user_id"));
 				resultPHRList.add(resultPHR);
 			}
 		} catch (SQLException e) {
@@ -240,7 +259,7 @@ public class DatabaseHandler {
 		resultPHRList = new ArrayList<PHR>();
 		byte[] output = null;
 		try {
-			preparedStatement = connection.prepareStatement("SELECT * FROM access_control_DB.Temp WHERE idTemp = ?;");
+			preparedStatement = connection.prepareStatement("SELECT * FROM access_control_DB.patient_health_record WHERE idTemp = ?;");
 			preparedStatement.setInt(1, PHRID);
 			resultSet = preparedStatement.executeQuery();
 			resultSet.next();
@@ -261,7 +280,7 @@ public class DatabaseHandler {
 		resultPHRList = new ArrayList<PHR>();
 		byte[] output = null;
 		try {
-			preparedStatement = connection.prepareStatement("SELECT cphBuf FROM access_control_DB.Temp WHERE idTemp = ?;");
+			preparedStatement = connection.prepareStatement("SELECT cphBuf FROM access_control_DB.patient_health_record WHERE idTemp = ?;");
 			preparedStatement.setInt(1, PHRID);
 			resultSet = preparedStatement.executeQuery();
 			resultSet.next();
@@ -274,4 +293,140 @@ public class DatabaseHandler {
 		return output;
 	}
 
+	/*
+	//This is just for testing purposes.....
+	public List<String> getUserList(){
+		startConnection();
+		PreparedStatement preparedStatement = null;
+		ResultSet resultSet = null;
+		resultTESTList = new ArrayList<String>();
+		
+		try {
+			preparedStatement = connection.prepareStatement("SELECT name FROM access_control_DB.user;");
+			//preparedStatement.setString(1, patientName);
+			resultSet = preparedStatement.executeQuery();
+			while (resultSet.next()) {
+				resultTESTList.add(resultSet.getString("name"));
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		closeConnection(preparedStatement, resultSet);
+		return resultTESTList;
+		
+	}*/
+
+	public static void  addEntity(String nameEntity,String[] rolesEntity,String dateAdded, Cpabe cpabe2) throws Exception{
+		startConnection();
+		PreparedStatement preparedStatement = null;
+		ResultSet generatedID = null;
+		int affectedRows;
+		int affectedRowId;
+		
+		try {
+			String insertUserSQL = "INSERT INTO access_control_db.user "
+					  			 + "(name) VALUES"
+					  			 + "(?);";
+			
+			preparedStatement = connection.prepareStatement(insertUserSQL, Statement.RETURN_GENERATED_KEYS);
+			preparedStatement.setString(1, nameEntity);
+
+			affectedRows = preparedStatement.executeUpdate();
+			if (affectedRows == 1) {
+				generatedID = preparedStatement.getGeneratedKeys();
+				if (generatedID.next()){
+					affectedRowId = generatedID.getInt(1);
+					int count = 0;
+					while(count<rolesEntity.length){
+						String insertRoleSQL = "INSERT INTO access_control_db." + rolesEntity[count++]
+					  			 			 + " (user_id,detail) VALUES"
+					  			 			 + " (?,?);";
+						preparedStatement = connection.prepareStatement(insertRoleSQL);
+						preparedStatement.setInt(1,affectedRowId);
+						preparedStatement.setString(2, dateAdded);
+						//JOptionPane.showMessageDialog(null, insertRoleSQL);
+						affectedRows = preparedStatement.executeUpdate();
+						if (affectedRows != 1) {
+							throw new SQLException("Creating user failed, no rows affected.");
+						}
+					}
+					
+					/*---------------------------------------------------------------*/
+					//Create Keys
+					publicFile = publicFile + nameEntity + affectedRowId;
+					boolean successFolder = (new File(publicFile)).mkdirs();
+					if (successFolder) {
+					    //Directory user creation
+						publicFile = publicFile + "/pub_key";
+						File successFile = new File(publicFile);
+						if(!successFile.exists()){
+							//File user creation
+							successFile.createNewFile();
+							
+							System.out.println("//start to setup");
+								cpabe2.setup(publicFile, masterFile);
+							System.out.println("//end to setup");
+							
+							System.out.println("//start to keygen");
+							try {
+								String attr = "userName:"+nameEntity + " userId:" + affectedRowId;
+								for(int i=0;i<rolesEntity.length;i++){
+									attr += " role" + i + ":" + rolesEntity[i];
+								}
+								privateFile = privateFile + "prv_key" + affectedRowId;
+								cpabe2.keygen(publicFile, privateFile, masterFile, attr);
+							} catch (NoSuchAlgorithmException | IOException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+							System.out.println("//end to keygen");
+						} else
+							throw new Exception("Failed to create entity.");
+					} else
+						throw new Exception("Failed to create entity.");
+					/*---------------------------------------------------------------*/
+	            } else {
+	                throw new SQLException("Creating user failed, no ID obtained.");
+	            }
+	        } else{
+	        	throw new SQLException("Creating user failed, no rows affected.");
+	        }
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		closeConnection(preparedStatement, generatedID);
+	}
+	
+	public static void  removeEntity(String removeName,String[] removeEntity,Integer removeID){
+		startConnection();
+		PreparedStatement preparedStatement = null;
+		ResultSet generatedID = null;
+		if(removeEntity[0].equals("empty")){
+			String[] removeEntity2 = {"patient","doctor","employer","insurance_co","user"};
+			removeEntity = removeEntity2;
+		}
+		
+		//int affectedRows;
+		ResultSet test = null;
+		/*int affectedRowId;*/
+		
+		try {
+			int count=0;
+			while(count<removeEntity.length){
+				String column = (removeEntity[count]=="user") ? "id=" : "user_id=";
+				String removeRoleSQL = "DELETE FROM access_control_db." + removeEntity[count++]
+									 + " WHERE " + column +  + removeID + ";";
+				preparedStatement = connection.prepareStatement(removeRoleSQL);
+				preparedStatement.executeUpdate();
+			}
+			JOptionPane.showMessageDialog(null, "Succesfully deleted entity related to user "+removeName+"("+removeID+")");
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		closeConnection(preparedStatement, test);
+	}
+	
 }
