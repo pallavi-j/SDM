@@ -34,19 +34,16 @@ public class DatabaseHandler {
 	//private static List<String> resultTESTList;
 	private static int successFlag;
 	private static int rowsAffected;
-	//private static String responseAddEnt;
 	
-	//private static Cpabe cpabe2;
+	//C:/Users/Arthur/git/SDM
 	private static String privateFile = "F:/University of Twente/SDM/";
-	private static String publicFile = "C:/Users/Arthur/git/SDM/publicKey/";
-	private static String masterFile = "C:/Users/Arthur/git/SDM/masterKey/master_key";
+	private static String publicFile = "./publicKey/";
+	private static String masterFile = "./masterKey/master_key";
 	
 	public DatabaseHandler() {
-		//cpabe2 = new Cpabe();
+		
 	}
 
-	
-	
 	/**
 	 * Initializes private fields user, password and URL and checks the success of database connection 
 	 * using these parameters.
@@ -321,7 +318,6 @@ public class DatabaseHandler {
 	}*/
 
 	public static void  addEntity(String nameEntity,String[] rolesEntity,String dateAdded, Cpabe cpabe2) throws Exception{
-		//responseAddEnt = "";
 		startConnection();
 		PreparedStatement preparedStatement = null;
 		ResultSet generatedID = null;
@@ -369,12 +365,7 @@ public class DatabaseHandler {
 							successFile.createNewFile();
 							
 							System.out.println("//start to setup");
-							//try {
 								cpabe2.setup(publicFile, masterFile);
-							//} catch (ClassNotFoundException | IOException e) {
-								// TODO Auto-generated catch block
-						//		e.printStackTrace();
-							//}
 							System.out.println("//end to setup");
 							
 							System.out.println("//start to keygen");
@@ -394,17 +385,6 @@ public class DatabaseHandler {
 							throw new Exception("Failed to create entity.");
 					} else
 						throw new Exception("Failed to create entity.");
-					
-					
-					
-					/*
-					System.out.println("//start to enc");
-					cpabe.enc(publicFile, policy, "Patient is infected");
-					System.out.println("//end to enc");
-
-					System.out.println("//start to dec");
-					cpabe.dec(publicFile, privateFile, 1);
-					System.out.println("//end to dec");*/
 					/*---------------------------------------------------------------*/
 	            } else {
 	                throw new SQLException("Creating user failed, no ID obtained.");
@@ -417,11 +397,9 @@ public class DatabaseHandler {
 		}
 		
 		closeConnection(preparedStatement, generatedID);
-		//return responseAddEnt;
 	}
 	
 	public static void  removeEntity(String removeName,String[] removeEntity,Integer removeID){
-		//responseAddEnt = "";
 		startConnection();
 		PreparedStatement preparedStatement = null;
 		ResultSet generatedID = null;
@@ -442,10 +420,6 @@ public class DatabaseHandler {
 									 + " WHERE " + column +  + removeID + ";";
 				preparedStatement = connection.prepareStatement(removeRoleSQL);
 				preparedStatement.executeUpdate();
-				//if (affectedRows != 1) {
-				//	JOptionPane.showMessageDialog(null, "Deleting Entity failed.\n One of the entity you're trying to delete may not have existed");
-				//	throw new SQLException("Deleting entity failed");
-				//}
 			}
 			JOptionPane.showMessageDialog(null, "Succesfully deleted entity related to user "+removeName+"("+removeID+")");
 		} catch (SQLException e) {
@@ -453,7 +427,6 @@ public class DatabaseHandler {
 		}
 		
 		closeConnection(preparedStatement, test);
-		//return responseAddEnt;
 	}
 	
 }
