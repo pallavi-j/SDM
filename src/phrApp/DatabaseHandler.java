@@ -1,9 +1,11 @@
 package phrApp;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -18,6 +20,8 @@ import javax.swing.JOptionPane;
 
 import com.mysql.jdbc.Statement;
 
+import cpabe.cpabe.Cpabe;
+
 public class DatabaseHandler {
 	
 	private static String url;
@@ -31,6 +35,17 @@ public class DatabaseHandler {
 	private static int successFlag;
 	private static int rowsAffected;
 	//private static String responseAddEnt;
+	
+	//private static Cpabe cpabe2;
+	private static String privateFile = "F:/University of Twente/SDM/";
+	private static String publicFile = "C:/Users/Arthur/git/SDM/publicKey/";
+	private static String masterFile = "C:/Users/Arthur/git/SDM/masterKey/master_key";
+	
+	public DatabaseHandler() {
+		//cpabe2 = new Cpabe();
+	}
+
+	
 	
 	/**
 	 * Initializes private fields user, password and URL and checks the success of database connection 
@@ -97,7 +112,7 @@ public class DatabaseHandler {
 		successFlag = -1;
 		rowsAffected = 0;
 		try {
-			preparedStatement = connection.prepareStatement("INSERT INTO access_control_DB.Temp " +
+			preparedStatement = connection.prepareStatement("INSERT INTO access_control_DB.patient_health_record " +
 					"(aesBuf, cphBuf) VALUES (?, ?);");
 			preparedStatement.setBytes(1, aesBuf);
 			preparedStatement.setBytes(2, cphBuf);
@@ -247,7 +262,7 @@ public class DatabaseHandler {
 		resultPHRList = new ArrayList<PHR>();
 		byte[] output = null;
 		try {
-			preparedStatement = connection.prepareStatement("SELECT * FROM access_control_DB.Temp WHERE idTemp = ?;");
+			preparedStatement = connection.prepareStatement("SELECT * FROM access_control_DB.patient_health_record WHERE idTemp = ?;");
 			preparedStatement.setInt(1, PHRID);
 			resultSet = preparedStatement.executeQuery();
 			resultSet.next();
@@ -268,7 +283,7 @@ public class DatabaseHandler {
 		resultPHRList = new ArrayList<PHR>();
 		byte[] output = null;
 		try {
-			preparedStatement = connection.prepareStatement("SELECT cphBuf FROM access_control_DB.Temp WHERE idTemp = ?;");
+			preparedStatement = connection.prepareStatement("SELECT cphBuf FROM access_control_DB.patient_health_record WHERE idTemp = ?;");
 			preparedStatement.setInt(1, PHRID);
 			resultSet = preparedStatement.executeQuery();
 			resultSet.next();
@@ -305,7 +320,7 @@ public class DatabaseHandler {
 		
 	}*/
 
-	public static void  addEntity(String nameEntity,String[] rolesEntity,String dateAdded){
+	public static void  addEntity(String nameEntity,String[] rolesEntity,String dateAdded, Cpabe cpabe2) throws Exception{
 		//responseAddEnt = "";
 		startConnection();
 		PreparedStatement preparedStatement = null;
@@ -340,8 +355,58 @@ public class DatabaseHandler {
 							throw new SQLException("Creating user failed, no rows affected.");
 						}
 					}
-	            }
-	            else {
+					
+					/*---------------------------------------------------------------*/
+					//Create Keys
+					publicFile = publicFile + nameEntity + affectedRowId;
+					boolean successFolder = (new File(publicFile)).mkdirs();
+					if (successFolder) {
+					    //Directory user creation
+						publicFile = publicFile + "/pub_key";
+						File successFile = new File(publicFile);
+						if(!successFile.exists()){
+							//File user creation
+							successFile.createNewFile();
+							
+							System.out.println("//start to setup");
+							//try {
+								cpabe2.setup(publicFile, masterFile);
+							//} catch (ClassNotFoundException | IOException e) {
+								// TODO Auto-generated catch block
+						//		e.printStackTrace();
+							//}
+							System.out.println("//end to setup");
+							
+							System.out.println("//start to keygen");
+							try {
+								String attr = "userName:"+nameEntity + " userId:" + affectedRowId;
+								for(int i=0;i<rolesEntity.length;i++){
+									attr += " role" + i + ":" + rolesEntity[i];
+								}
+								privateFile = privateFile + "prv_key" + affectedRowId;
+								cpabe2.keygen(publicFile, privateFile, masterFile, attr);
+							} catch (NoSuchAlgorithmException | IOException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+							System.out.println("//end to keygen");
+						} else
+							throw new Exception("Failed to create entity.");
+					} else
+						throw new Exception("Failed to create entity.");
+					
+					
+					
+					/*
+					System.out.println("//start to enc");
+					cpabe.enc(publicFile, policy, "Patient is infected");
+					System.out.println("//end to enc");
+
+					System.out.println("//start to dec");
+					cpabe.dec(publicFile, privateFile, 1);
+					System.out.println("//end to dec");*/
+					/*---------------------------------------------------------------*/
+	            } else {
 	                throw new SQLException("Creating user failed, no ID obtained.");
 	            }
 	        } else{
